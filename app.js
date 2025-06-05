@@ -2,34 +2,36 @@ const express = require("express");
 const path = require("node:path");
 
 const app = express();
-app.use(express.urlencoded({ extended: false }));
 
 const PORT = 3000;
 
-// data
+// Middleware
+app.use(express.urlencoded({ extended: false }));
+
+// Data store
 const messages = [
   {
     text: "Hi there!",
     user: "Amando",
-    added: new Date(),
+    added: new Date("2025-06-05T12:00:00Z"), // fixed timestamp for consistency
   },
   {
     text: "Hello World!",
     user: "Charles",
-    added: new Date(),
+    added: new Date("2025-06-05T12:01:00Z"),
   },
 ];
 
-// define the views and view engine app properties
+// View engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-const assetsPath = path.join(__dirname, "public");
-app.use(express.static(assetsPath));
+// Serve static assets
+app.use(express.static(path.join(__dirname, "public")));
 
-// paths
+// Routes
 app.get("/", (req, res) => {
-  res.render("index", { title: "Mini Messageboard", messages: messages });
+  res.render("index", { title: "Mini Messageboard", messages });
 });
 
 app.get("/new", (req, res) => {
@@ -37,20 +39,20 @@ app.get("/new", (req, res) => {
 });
 
 app.post("/new", (req, res) => {
-  const { user, text } = req.body;
+  const user = req.body.user?.trim();
+  const text = req.body.text?.trim();
 
   if (user && text) {
     messages.push({
-      user: user,
-      text: text,
+      user,
+      text,
       added: new Date(),
     });
   }
-
   res.redirect("/");
 });
 
-// run server
+// Start server
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
